@@ -410,6 +410,13 @@ footer a:hover { color: var(--accent); }
       </svg>
       Atualizar
     </button>
+    <button class="refresh" onclick="openExportTable()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="9" y1="9" x2="9" y2="21"/>
+      </svg>
+      Tabela
+    </button>
   </div>
 </header>
 
@@ -880,6 +887,81 @@ async function loadCPI() {
   }
 }
 
+
+function openExportTable() {
+  const rowPrice = sym => {
+    const cell = document.querySelector('#row-' + CSS.escape(sym) + ' td.price');
+    return cell ? cell.textContent.trim() : '—';
+  };
+  const macro = id => {
+    const el = document.getElementById(id);
+    return el ? el.textContent.trim() : '—';
+  };
+
+  const data = [
+    ['Ibovespa',        rowPrice('^BVSP')],
+    ['Dow Jones',       rowPrice('^DJI')],
+    ['Nasdaq 100',      rowPrice('^NDX')],
+    ['Selic Meta',      macro('m-selic')],
+    ['CDI',             macro('m-cdi')],
+    ['CDI',             macro('m-cdi')],
+    ['IPCA',            macro('m-ipca')],
+    ['IGP-M',           macro('m-igpm')],
+    ['Dólar Comercial', macro('m-usdbrl')],
+    ['Euro Comercial',  macro('m-eurbrl')],
+    ['Dólar Turismo',   macro('m-usdtur')],
+    ['Euro Turismo',    macro('m-eurtur')],
+  ];
+
+  const tableRows = data.map(([nome, valor]) =>
+    `<tr><td>${nome}</td><td>${valor}</td></tr>`
+  ).join('');
+
+  const dataHora = new Date().toLocaleString('pt-BR');
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel de Mercado — Exportar</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 32px; background: #fff; color: #111; }
+  h2 { font-size: 16px; margin-bottom: 4px; }
+  .sub { font-size: 12px; color: #666; margin-bottom: 20px; }
+  table { border-collapse: collapse; min-width: 320px; }
+  th { background: #f4f4f4; text-align: left; padding: 8px 14px; font-size: 12px;
+       text-transform: uppercase; letter-spacing: .05em; border: 1px solid #ddd; }
+  td { padding: 7px 14px; border: 1px solid #ddd; font-size: 13px; }
+  tr:nth-child(even) td { background: #fafafa; }
+  button { margin-bottom: 18px; padding: 8px 18px; font-size: 13px; cursor: pointer;
+           background: #111; color: #fff; border: none; border-radius: 3px; }
+  button:active { opacity: .7; }
+</style>
+</head>
+<body>
+<h2>Painel de Mercado</h2>
+<div class="sub">Atualizado em ${dataHora} &nbsp;·&nbsp; Selecione a tabela e cole no Excel (Ctrl+V)</div>
+<button onclick="selectTable()">Selecionar tabela</button>
+<table id="t">
+  <thead><tr><th>Informação</th><th>Valor</th></tr></thead>
+  <tbody>${tableRows}</tbody>
+</table>
+<script>
+function selectTable() {
+  const r = document.createRange();
+  r.selectNode(document.getElementById('t'));
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(r);
+}
+selectTable();
+<\/script>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
 
 async function loadAll() {
   const btn = document.getElementById('refresh-btn');
