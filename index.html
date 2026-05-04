@@ -429,6 +429,8 @@ footer a:hover { color: var(--accent); }
     <div class="macro-cell"><div class="label">CPI 12m</div><div class="value" id="m-cpi">—</div><div class="sub" id="m-cpi-sub">EUA</div></div>
     <div class="macro-cell"><div class="label">UST 10Y</div><div class="value" id="m-ust10">—</div><div class="sub" id="m-ust10-sub">Treasury</div></div>
     <div class="macro-cell"><div class="label">UST 2Y</div><div class="value" id="m-ust2">—</div><div class="sub" id="m-ust2-sub">Treasury</div></div>
+    <div class="macro-cell"><div class="label">IGP-M 12m</div><div class="value" id="m-igpm">—</div><div class="sub" id="m-igpm-sub">BCB</div></div>
+    <div class="macro-cell"><div class="label">EUR/BRL</div><div class="value" id="m-eurbrl">—</div><div class="sub" id="m-eurbrl-sub">—</div></div>
   </div>
 </section>
 
@@ -794,6 +796,13 @@ async function loadBCB() {
     document.getElementById('m-ipca').textContent = fmt.num(v, 2) + '%';
     document.getElementById('m-ipca-sub').textContent = 'acum. 12m · ' + d[d.length - 1].data;
   } catch (e) { console.warn('IPCA fail', e); }
+
+  try {
+    const d = await fetchSeries(4175, 1);
+    const v = parseFloat(d[d.length - 1].valor);
+    document.getElementById('m-igpm').textContent = fmt.num(v, 2) + '%';
+    document.getElementById('m-igpm-sub').textContent = 'acum. 12m · ' + d[d.length - 1].data;
+  } catch (e) { console.warn('IGPM fail', e); }
 }
 
 async function loadMacroYahoo() {
@@ -803,6 +812,13 @@ async function loadMacroYahoo() {
     const cls = fmt.cls(d.dayPct);
     document.getElementById('m-usdbrl-sub').innerHTML = `<span class="${cls}">${fmt.pct(d.dayPct)} dia</span>`;
   } catch (e) { console.warn('USDBRL fail', e); }
+
+  try {
+    const d = await fetchYahoo('EURBRL=X');
+    document.getElementById('m-eurbrl').textContent = 'R$ ' + fmt.num(d.price, 4);
+    const cls = fmt.cls(d.dayPct);
+    document.getElementById('m-eurbrl-sub').innerHTML = `<span class="${cls}">${fmt.pct(d.dayPct)} dia</span>`;
+  } catch (e) { console.warn('EURBRL fail', e); }
 
   try {
     const d = await fetchYahoo('^TNX');
