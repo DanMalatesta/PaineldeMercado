@@ -676,10 +676,13 @@ async function fetchYahoo(symbol) {
   const moPct   = ((price - findBefore(30 * 86400e3)) / findBefore(30 * 86400e3)) * 100;
 
   const yearStart = new Date(new Date(now).getFullYear(), 0, 1).getTime();
-  const ytdRef = series.find(p => p.t >= yearStart)?.c ?? series[0].c;
+  // Last close of the previous year (reference for YTD), not first close of current year
+  const ytdRef = [...series].reverse().find(p => p.t < yearStart)?.c ?? series[0].c;
   const ytdPct = ((price - ytdRef) / ytdRef) * 100;
 
-  const spark = series.slice(-30).map(p => p.c);
+  // Last 30 calendar days ≈ ~21 trading days, matching the "30 dias" label
+  const spark30DaysAgo = now - 30 * 86400e3;
+  const spark = series.filter(p => p.t >= spark30DaysAgo).map(p => p.c);
 
   const ask = meta.ask ?? price;
 
